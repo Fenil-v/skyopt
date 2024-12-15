@@ -1,3 +1,4 @@
+
 export const getToken = (): string => {
 	const tokenKey = import.meta.env.VITE_APP_AUTH;
 	return localStorage.getItem(tokenKey) || "";

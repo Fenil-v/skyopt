@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/material_green.css"; // Import the desired theme
-import moment from "moment";
 
 const DatePicker = ({ label, onDateChange, options, currDate }: any) => {
   const [date, setDate]:any = useState(null); 
