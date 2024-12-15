@@ -1,0 +1,426 @@
+openapi: 3.1.0
+info:
+  title: Flight Price Comparison and Discount API
+  description: API for comparing flight prices and creating discounted price details
+  version: '1.0'
+  
+servers:
+  - url: http://localhost:9090
+    description: Local Development Server
+paths:
+  /api/prices/best-price:
+    get:
+      summary: Get best flight price across airlines
+      description: Returns the best price across airlines for a person booking from the location to the destination
+      tags:
+        - Price Comparison
+      parameters:
+        - name: origin
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Z]{3}$'
+            minLength: 3
+            maxLength: 3
+          description: Origin airport code (e.g., JFK)
+        - name: destination
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Z]{3}$'
+            minLength: 3
+            maxLength: 3
+          description: Destination airport code (e.g., LAX)
+        - name: departureDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Departure date (YYYY-MM-DD)
+        - name: returnDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Return date for round trips (YYYY-MM-DD)
+        - name: currency
+          in: query
+          required: false
+          schema:
+            type: string
+            default: USD
+            pattern: '^[A-Z]{3}$'
+            minLength: 3
+            maxLength: 3
+          description: Preferred currency for price display
+      responses:
+        '200':
+          description: Successful price comparison
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceComparisonResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No flights found for the specified route
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                serverError:
+                  value:
+                    code: "INTERNAL_SERVER_ERROR"
+                    message: "An unexpected error occurred while processing your request"
+                    timestamp: "2024-11-11T18:00:00Z"
+                databaseError:
+                  value:
+                    code: "DATABASE_ERROR"
+                    message: "Unable to connect to the database"
+                    timestamp: "2024-11-11T18:00:00Z"
+          
+  /api/prices/discount:
+    post:
+      operationId: createDiscount
+      description: Calculate a price discount by checking whether it is the user's first time booking
+      parameters:
+        - name: token
+          in: header
+          description: The authentication token of the logged-in user.
+          required: true
+          schema:
+            type: string
+        - name: isFirstTimeUser
+          in: header
+          description: Indicates if this is the user's first alert creation
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertRequest'
+      responses:
+        '201':
+          description: Alert successfully created with discount applied for first-time users.
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertRequest'
+              examples:
+                firstTimeUser:
+                  value:
+                    alertId: "123e4567-e89b-12d3-a456-426614174000"
+                    status: "Active"
+                    route:
+                      from: "JFK"
+                      to: "LAX"
+                    originalPrice:
+                      amount: 500.00
+                      currency: "USD"
+                    discountedPrice:
+                      amount: 350.00
+                      currency: "USD"
+                    discountApplied: 30
+                    isFirstTimeDiscount: true
+                    createdAt: "2024-11-12T14:00:00Z"
+                    message: "First-time user discount of 30% applied!"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                serverError:
+                  value:
+                    code: "INTERNAL_SERVER_ERROR"
+                    message: "An unexpected error occurred while processing your request"
+                    timestamp: "2024-11-11T18:00:00Z"
+                databaseError:
+                  value:
+                    code: "DATABASE_ERROR"
+                    message: "Unable to connect to the database"
+                    timestamp: "2024-11-11T18:00:00Z"
+components:
+  schemas:
+    Airport:
+      type: object
+      properties:
+        airport_code:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          minLength: 3
+          maxLength: 3
+          examples:
+            - "JFK"
+            - "LAX"
+            - "LHR"
+        city:
+          type: string
+          examples:
+            - "New York"
+            - "Los Angeles"
+            - "London"
+        country:
+          type: string
+          examples:
+            - "United States"
+            - "United Kingdom"
+      required:
+        - airport_code
+        - city
+        - country
+
+    Price:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          examples:
+            - 299.99
+            - 450.50
+            - 899.99
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          minLength: 3
+          maxLength: 3
+          examples:
+            - "USD"
+            - "EUR"
+            - "GBP"
+      required:
+        - amount
+        - currency
+
+    Route:
+      type: object
+      properties:
+        from:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          minLength: 3
+          maxLength: 3
+          examples:
+            - "JFK"
+            - "LAX"
+        to:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          minLength: 3
+          maxLength: 3
+          examples:
+            - "LHR"
+            - "CDG"
+      required:
+        - from
+        - to
+
+    FlightPrice:
+      type: object
+      properties:
+        airline:
+          type: string
+          examples:
+            - "Delta Airlines"
+            - "British Airways"
+            - "United Airlines"
+        flightNumber:
+          type: string
+          pattern: '^[A-Z0-9]{2,8}$'
+          examples:
+            - "DL123"
+            - "BA456"
+            - "UA789"
+        price:
+          $ref: '#/components/schemas/Price'
+        departureTime:
+          type: string
+          format: date-time
+        arrivalTime:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          minimum: 0
+          description: Flight duration in minutes
+          examples:
+            - 180
+            - 240
+            - 420
+      required:
+        - airline
+        - flightNumber
+        - price
+        - departureTime
+        - arrivalTime
+        - duration
+
+    PriceComparisonResponse:
+      type: object
+      properties:
+        route:
+          $ref: '#/components/schemas/Route'
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlightPrice'
+          minItems: 1
+        lastUpdated:
+          type: string
+          format: date-time
+      required:
+        - route
+        - prices
+        - lastUpdated
+
+    PriceAlertRequest:
+      type: object
+      properties:
+        route:
+          $ref: '#/components/schemas/Route'
+        targetPrice:
+          type: number
+          format: double
+          minimum: 0
+          examples:
+            - 299.99
+            - 450.00
+            - 599.99
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          default: "USD"
+          examples:
+            - "USD"
+            - "EUR"
+            - "GBP"
+        expiryDate:
+          type: string
+          format: date
+          examples:
+            - "2024-12-31"
+            - "2025-06-30"
+      required:
+        - route
+        - targetPrice
+    
+    AlertRequest:
+      type: object
+      required:
+        - route
+        - targetPrice
+      properties:
+        route:
+          $ref: '#/components/schemas/Route'
+        targetPrice:
+          type: number
+          format: double
+          minimum: 0
+          examples:
+            - 299.99
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          default: "USD"
+          examples:
+            - "USD"
+            - "EUR"
+
+    PriceAlertResponse:
+      type: object
+      properties:
+        alertId:
+          type: string
+          format: uuid
+          examples:
+            - "123e4567-e89b-12d3-a456-426614174000"
+            - "987fcdeb-51a2-43f7-9abc-def123456789"
+        status:
+          type: string
+          enum: [Active, Triggered, Expired]
+          examples:
+            - "Active"
+            - "Triggered"
+            - "Expired"
+        route:
+          $ref: '#/components/schemas/Route'
+        targetPrice:
+          $ref: '#/components/schemas/Price'
+        createdAt:
+          type: string
+          format: date-time
+        expiryDate:
+          type: string
+          format: date
+        message:
+          type: string
+          examples:
+            - "Price alert created successfully"
+            - "Price alert updated"
+      required:
+        - alertId
+        - status
+        - route
+        - targetPrice
+        - createdAt
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          examples:
+            - "INVALID_PARAMETER"
+            - "UNAUTHORIZED"
+            - "RESOURCE_NOT_FOUND"
+        message:
+          type: string
+          examples:
+            - "Invalid airport code provided"
+            - "User not authenticated"
+            - "Flight not found"
+        details:
+          type: object
+          additionalProperties: true
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - code
+        - message
+        - timestamp
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

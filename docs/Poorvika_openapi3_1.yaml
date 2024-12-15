@@ -1,0 +1,227 @@
+openapi: 3.1.0
+info:
+  title: Flight Booking QR Code API
+  description: API for generating, downloading, and sharing QR codes for flight bookings.
+  version: 1.0.0
+  
+servers:
+  - url: "http://localhost:9090"
+    description: Local development environment
+
+paths:
+  /api/qr/generate:
+    post:
+      summary: Generate a QR code for flight booking
+      operationId: generateQrCode
+      description: Generate a QR code containing booking details, which can be downloaded or shared.
+      requestBody:
+        description: Flight booking details to generate the QR code
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QrCodeGenerationRequest'
+      responses:
+        '200':
+          description: QR code successfully generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QrCodeGenerationResponse'
+        '400':
+          description: Invalid input data (e.g., missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Invalid input data or email format"
+                code: 400
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Internal server error"
+                code: 500
+
+  /api/qr/download:
+    get:
+      summary: Download a generated QR code
+      operationId: downloadQrCode
+      description: Download a generated QR code image based on the booking ID.
+      parameters:
+        - name: booking_id
+          in: query
+          description: The booking ID for which the QR code was generated.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: QR code successfully downloaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QrCodeDownloadResponse'
+        '404':
+          description: QR code not found for the given booking ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "QR code not found for the given booking ID"
+                code: 404
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Internal server error"
+                code: 500
+
+  /api/qr/share:
+    post:
+      summary: Share the QR code via email
+      operationId: shareQrCode
+      description: Share the generated QR code by sending it as an attachment to the provided email address.
+      requestBody:
+        description: Share the QR code to the recipient's email address.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QrCodeShareRequest'
+      responses:
+        '200':
+          description: QR code successfully sent via email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QrCodeShareResponse'
+        '400':
+          description: Invalid input data or email format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Invalid input data or email format"
+                code: 400
+        '500':
+          description: Failed to send email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Failed to send email"
+                code: 500
+
+components:
+  schemas:
+    QrCodeGenerationRequest:
+      type: object
+      required:
+        - booking_id
+        - passenger_name
+        - flight_number
+        - departure_time
+        - origin
+        - destination
+      properties:
+        booking_id:
+          type: string
+          description: Unique identifier for the booking
+          examples:
+            - value: "booking12345"
+        passenger_name:
+          type: string
+          description: Full name of the passenger
+          examples:
+            - value: "John Doe"
+        flight_number:
+          type: string
+          description: Flight number associated with the booking
+          examples:
+            - value: "AA123"
+        departure_time:
+          type: string
+          format: date-time
+          description: Scheduled departure time of the flight
+          examples:
+            - value: "2024-12-15T14:30:00Z"
+        origin:
+          type: string
+          description: Airport code of the departure location
+          examples:
+            - value: "JFK"
+        destination:
+          type: string
+          description: Airport code of the arrival location
+          examples:
+            - value: "LAX"
+
+    QrCodeGenerationResponse:
+      type: object
+      properties:
+        qr_code_url:
+          type: string
+          description: URL where the generated QR code can be accessed
+          examples:
+            - value: "/qr/codes/booking12345.png"
+
+    QrCodeDownloadResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Status message confirming successful download
+          examples:
+            - value: "QR code downloaded successfully"
+
+    QrCodeShareRequest:
+      type: object
+      required:
+        - booking_id
+        - recipient_email
+      properties:
+        booking_id:
+          type: string
+          description: Unique identifier for the booking
+          examples:
+            - value: "booking12345"
+        recipient_email:
+          type: string
+          format: email
+          description: Email address of the recipient
+          examples:
+            - value: "recipient@example.com"
+
+    QrCodeShareResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Status message confirming successful sharing of the QR code
+          examples:
+            - value: "QR code sent successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message providing more details
+        code:
+          type: integer
+          description: Error code indicating the type of error
+          enum:
+            - 400
+            - 404
+            - 500

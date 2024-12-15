@@ -1,0 +1,247 @@
+openapi: 3.1.0
+info:
+  title: 
+  summary: REST APIs for searching and booking flights
+  version: '1.0'
+servers:
+  - url: "http://localhost:9090"
+    description: Local development environment
+paths:
+  /api/flights/search:
+    get:
+      operationId: search-flights
+      description: Search for flights based on origin, destination, dates, and other filters
+      parameters:
+        - name: origin
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Airport code or city of origin
+        - name: destination
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Airport code or city of destination
+        - name: departureDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Departure date in YYYY-MM-DD format
+        - name: returnDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Return date in YYYY-MM-DD format
+        - name: maxStops
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Maximum number of stops (e.g., 0 for nonstop)
+        - name: airline
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Preferred airline for the flight
+      responses:
+        200:
+          description: Successfully retrieved the list of flights
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Flight"
+        400:
+          description: Invalid parameters supplied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        401:
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/flights/{flightId}:
+    get:
+      operationId: get-flight-details
+      description: Retrieve details of a specific flight by its unique flight ID
+      parameters:
+        - name: flightId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier of the flight to retrieve details
+      responses:
+        200:
+          description: Successfully retrieved flight details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flight"
+        400:
+          description: Invalid flight ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        401:
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: Flight not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/flights/book:
+    post:
+      operationId: book-flight
+      description: Book a flight for the user by providing the flight ID and user details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingRequest"
+      responses:
+        201:
+          description: Flight successfully booked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingConfirmation"
+        400:
+          description: Invalid booking request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        401:
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: Flight not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Flight:
+      type: object
+      properties:
+        flightId:
+          type: string
+          description: Unique identifier for the flight
+        origin:
+          type: string
+          description: Origin airport or city
+        destination:
+          type: string
+          description: Destination airport or city
+        departureDateTime:
+          type: string
+          format: date-time
+          description: Departure date and time in ISO 8601 format
+        arrivalDateTime:
+          type: string
+          format: date-time
+          description: Arrival date and time in ISO 8601 format
+        airline:
+          type: string
+          description: Name of the airline
+        price:
+          type: number
+          format: float
+          description: Ticket price for the flight
+        stops:
+          type: integer
+          description: Number of stops
+    BookingRequest:
+      type: object
+      properties:
+        flightId:
+          type: string
+          description: ID of the flight to book
+        userId:
+          type: string
+          description: ID of the user booking the flight
+        passengers:
+          type: array
+          description: List of passengers
+          items:
+            $ref: "#/components/schemas/Passenger"
+    Passenger:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Passenger's first name
+        lastName:
+          type: string
+          description: Passenger's last name
+        age:
+          type: integer
+          description: Passenger's age
+        passportNumber:
+          type: string
+          description: Passenger's passport number
+    BookingConfirmation:
+      type: object
+      properties:
+        bookingId:
+          type: string
+          description: Unique booking ID
+        flightId:
+          type: string
+          description: ID of the booked flight
+        status:
+          type: string
+          description: Status of the booking (e.g., confirmed, pending)
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
