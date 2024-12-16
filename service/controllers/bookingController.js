@@ -9,7 +9,7 @@ export const createBooking = async (req, res) => {
   try {
     const { flightNumber, passengerDetails } = req.body;
     const userId = req.user.id;
-
+    
     // Validate request body
     if (
       !flightNumber ||
