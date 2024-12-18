@@ -1,19 +1,6 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/DIHvCS29)
 
 ---
-
-## Team Name: 404 Brainstormers
-
-## Project Video Link:
-https://northeastern-my.sharepoint.com/:v:/r/personal/desai_dhruv1_northeastern_edu/Documents/SkyOpt.mp4?csf=1&web=1&e=2jkTDc&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D
-
-## Team Members and emails:
-
--   Sakshi Parikh: parikh.saks@northeastern.edu
--   Dhruv Desai: desai.dhruv1@northeastern.edu
--   Fenil Vaghasiya: vaghasiya.f@northeastern.edu
--   Poorvika Girish Babu: girishbabu.p@northeastern.edu
-
 # SkyOpt
 
 ## Project Overview
