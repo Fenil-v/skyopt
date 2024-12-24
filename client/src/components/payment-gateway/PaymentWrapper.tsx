@@ -3,7 +3,7 @@ import { PaymentForm } from "./PaymentForm";
 import { stripePromise } from "../../services/stripe";
 import { Alert, CircularProgress } from "@mui/material";
 import { useEffect } from "react";
-import { getToken } from "../Helpers";
+import { getToken } from "../Helpers.tsx";
 import { useState } from "react";
 import { createPaymentIntent } from "../../services/_requests";
 import axios from "axios";

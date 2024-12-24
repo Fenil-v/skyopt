@@ -33,7 +33,7 @@ import ToastAlert from "../ToastAlert";
 import { ToastContainer } from "react-toastify";
 import ExportToCsv from "../ExportCsv";
 import { AppDispatch } from "../../store/index";
-import { getToken } from "../Helpers";
+import { getToken } from "../Helpers.tsx";
 
 const ViewBookings = () => {
 	const dispatch = useDispatch<AppDispatch>();

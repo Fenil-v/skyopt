@@ -20,7 +20,7 @@ import {
 	createBooking,
 	fetchUserData,
 } from "../../services/_requests";
-import { getToken } from "../Helpers";
+import { getToken } from "../Helpers.tsx";
 import { PaymentDialog } from "../payment-gateway/PaymentDialog";
 import {
 	AccessTime,
