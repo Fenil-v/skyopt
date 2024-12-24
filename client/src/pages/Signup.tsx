@@ -17,7 +17,7 @@ import ToastAlert from "../components/ToastAlert";
 import Swal from "sweetalert2";
 import Loader from "../components/PageLoader";
 import { useNavigate } from "react-router-dom";
-import { getToken } from "../components/Helpers";
+import { getToken } from "../components/Helpers.tsx";
 import DatePicker from "../components/DateFlatPicker";
 import "../../public/assets/custom/custom.css";
 import moment from "moment";

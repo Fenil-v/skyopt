@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next";
 import NavBar from "../components/Navbar";
 import FlightCard from "../components/flights/FlightCard";
 import { fetchFlightsByCriteria, fetchUserData } from "../services/_requests";
-import { getToken } from "../components/Helpers";
+import { getToken } from "../components/Helpers.tsx";
 import CouponCodeComponent from "../components/CouponCodeComponent";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";

@@ -7,7 +7,7 @@ import {
 } from "../models/_models";
 import store from "../store";
 import { setAuthToken } from "../store/slices/authSlice";
-import { getToken } from "../components/Helpers";
+import { getToken } from "../components/Helpers.tsx";
 const API_URL = import.meta.env.VITE_APP_API_URL;
 
 //user verify

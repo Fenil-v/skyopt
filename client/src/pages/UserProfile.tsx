@@ -25,7 +25,7 @@ import NavBar from "../components/Navbar";
 import { MenuItem } from "@mui/material";
 import { logout } from "../services/_requests";
 import ToastAlert from "../components/ToastAlert";
-import { getToken } from "../components/Helpers";
+import { getToken } from "../components/Helpers.tsx";
 
 const UserProfile: React.FC = () => {
 	const token = getToken();
